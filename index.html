@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Interaktif KVKVKV Pemulihan Tahun 2</title>
+<style>
+body {
+font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+background: linear-gradient(135deg, #FFE5EC, #F0E6FF);
+margin: 0;
+padding: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+min-height: 100vh;
+}
+
+h1 {
+color: #FF477E;
+text-shadow: 2px 2px #FFF;
+font-size: 2.5rem;
+margin-bottom: 10px;
+text-align: center;
+}
+
+.score-board {
+background-color: #FFF;
+padding: 10px 20px;
+border-radius: 20px;
+box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+font-size: 1.2rem;
+font-weight: bold;
+color: #4A4A4A;
+margin-bottom: 20px;
+}
+
+.game-container {
+background: #FFF;
+padding: 30px;
+border-radius: 30px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+max-width: 600px;
+width: 100%;
+text-align: center;
+border: 5px solid #FFB3C6;
+}
+
+/* Wheel Animation Area */
+.wheel-section {
+margin: 20px 0;
+position: relative;
+}
+
+.wheel-box {
+width: 160px;
+height: 160px;
+border-radius: 50%;
+border: 8px dashed #FF7096;
+margin: 0 auto;
+display: flex;
+align-items: center;
+justify-content: center;
+background-color: #FFF0F5;
+font-size: 2rem;
+font-weight: bold;
+color: #743AD5;
+transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spinning {
+animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+0% { transform: rotate(0deg); }
+50% { transform: rotate(10deg); }
+100% { transform: rotate(-10deg); }
+}
+
+.syllable-display {
+font-size: 2.2rem;
+font-weight: bold;
+color: #4CC9F0;
+background: #F8F9FA;
+padding: 15px;
+border-radius: 15px;
+border: 3px dashed #BEE9E8;
+letter-spacing: 5px;
+margin: 20px 0;
+min-height: 50px;
+}
+
+.btn-spin {
+background: linear-gradient(135deg, #FF477E, #FF7096);
+color: white;
+border: none;
+padding: 15px 40px;
+font-size: 1.5rem;
+font-weight: bold;
+border-radius: 50px;
+cursor: pointer;
+box-shadow: 0 5px 15px rgba(255, 71, 126, 0.4);
+transition: transform 0.2s;
+}
+
+.btn-spin:hover {
+transform: scale(1.05);
+}
+
+.btn-spin:disabled {
+background: #CCC;
+box-shadow: none;
+cursor: not-allowed;
+}
+
+/* Options layout */
+.options-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-top: 25px;
+}
+
+.btn-option {
+background-color: #F7F7F7;
+border: 3px solid #E0E0E0;
+padding: 15px;
+font-size: 1.4rem;
+font-weight: bold;
+border-radius: 15px;
+cursor: pointer;
+transition: all 0.2s;
+color: #333;
+}
+
+.btn-option:hover:not(:disabled) {
+background-color: #E8F0FE;
+border-color: #3A86FF;
+transform: translateY(-2px);
+}
+
+.correct {
+background-color: #D4EDDA !important;
+border-color: #28A745 !important;
+color: #155724 !important;
+}
+
+.wrong {
+background-color: #F8D7DA !important;
+border-color: #DC3545 !important;
+color: #721C24 !important;
+}
+
+.feedback-message {
+font-size: 1.5rem;
+font-weight: bold;
+margin-top: 15px;
+min-height: 35px;
+}
+
+.next-section {
+margin-top: 20px;
+}
+
+.btn-next {
+background-color: #3A86FF;
+color: white;
+border: none;
+padding: 10px 30px;
+font-size: 1.2rem;
+border-radius: 10px;
+cursor: pointer;
+display: none;
+}
+
+/* End Screen */
+.end-screen {
+display: none;
+}
+
+.sparkle {
+font-size: 3rem;
+}
+</style>
+</head>
+<body>
+
+<h1>🎯 Jom Eja KVKVKV! 🎯</h1>
+
+<div class="score-board">
+Soalan: <span id="current-q">1</span>/15 | Markah: <span id="score">0</span>
+</div>
+
+<div class="game-container" id="game-box">
+<!-- Main Game Area -->
+<div id="play-area">
+<p style="font-size: 1.2rem; color: #666; margin: 0;">Tekan butang di bawah untuk dapatkan suku kata!</p>
+
+<div class="wheel-section">
+<div class="wheel-box" id="wheel">🎁</div>
+</div>
+
+<button class="btn-spin" id="spin-button" onclick="spinWheel()">Pusing Roda!</button>
+
+<div class="syllable-display" id="syllables">? + ? + ?</div>
+
+<p style="font-weight: bold; color: #555;">Pilih perkataan yang betul:</p>
+<div class="options-grid" id="options-container">
+<button class="btn-option" disabled onclick="checkAnswer(this)">-</button>
+<button class="btn-option" disabled onclick="checkAnswer(this)">-</button>
+<button class="btn-option" disabled onclick="checkAnswer(this)">-</button>
+<button class="btn-option" disabled onclick="checkAnswer(this)">-</button>
+</div>
+
+<div class="feedback-message" id="feedback"></div>
+
+<div class="next-section">
+<button class="btn-next" id="next-button" onclick="nextQuestion()">Soalan Seterusnya ➡️</button>
+</div>
+</div>
+
+<!-- End Screen Area -->
+<div class="end-screen" id="end-area">
+<div class="sparkle">🎉🌟👏</div>
+<h2>Selesai! Syabas Murid-Murid!</h2>
+<p style="font-size: 1.5rem;">Markah Akhir: <strong id="final-score" style="color: #FF477E;">0</strong> / 15</p>
+<p style="font-size: 1.1rem; color: #666;" id="evaluation-msg"></p>
+<button class="btn-spin" onclick="resetGame()">Main Semula 🔄</button>
+</div>
+</div>
+
+<script>
+// 15 perkataan KVKVKV yang sesuai untuk murid pemulihan tahun 2
+const bankSoalan = [
+{ sukuKata: "ke + ru + si", jawapan: "kerusi", pilihan: ["kerusi", "kereta", "kelapa", "kemari"] },
+{ sukuKata: "ke + re + ta", jawapan: "kereta", pilihan: ["kebaya", "kereta", "kerana", "keladi"] },
+{ sukuKata: "ke + la + pa", jawapan: "kelapa", pilihan: ["kepala", "keladi", "kelapa", "ketawa"] },
+{ sukuKata: "de + li + ma", jawapan: "delima", pilihan: ["delima", "derita", "dahaga", "domino"] },
+{ sukuKata: "to + ma + to", jawapan: "tomato", pilihan: ["kamera", "tomato", "bateri", "petani"] },
+{ sukuKata: "ka + me + ra", jawapan: "kamera", pilihan: ["kamera", "kemeja", "kerana", "kebaya"] },
+{ sukuKata: "pe + ta + ni", jawapan: "petani", pilihan: ["petola", "petani", "perahu", "pelita"] },
+{ sukuKata: "ke + ba + ya", jawapan: "kebaya", pilihan: ["kerana", "kepala", "kebaya", "kereta"] },
+{ sukuKata: "ba + ha + ya", jawapan: "bahaya", pilihan: ["bahaya", "cahaya", "dahaga", "bahasa"] },
+{ sukuKata: "ca + ha + ya", jawapan: "cahaya", pilihan: ["bahaya", "cahaya", "kebaya", "budaya"] },
+{ sukuKata: "se + le + sa", jawapan: "selesa", pilihan: ["selasa", "selesa", "seligi", "semata"] },
+{ sukuKata: "ba + te + ri", jawapan: "bateri", pilihan: ["bateri", "boneka", "berita", "batu"] },
+{ sukuKata: "bo + ne + ka", jawapan: "boneka", pilihan: ["bateri", "rebana", "boneka", "bencana"] },
+{ sukuKata: "pe + li + ta", jawapan: "pelita", pilihan: ["petani", "pelita", "perahu", "petola"] },
+{ sukuKata: "ke + me + ja", jawapan: "kemeja", pilihan: ["kamera", "kemeja", "kerusi", "kelapa"] }
+];
+
+let soalanSemasa = 0;
+let markah = 0;
+let dataSoalanRawak = [];
+
+// Susun rawak soalan supaya setiap kali main turutan berbeza
+function inisialiseGame() {
+dataSoalanRawak = [...bankSoalan].sort(() => Math.random() - 0.5);
+soalanSemasa = 0;
+markah = 0;
+kemaskiniPapanMarkah();
+paparSoalan();
+document.getElementById('play-area').style.display = "block";
+document.getElementById('end-area').style.display = "none";
+}
+
+function kemaskiniPapanMarkah() {
+document.getElementById('current-q').innerText = soalanSemasa + 1;
+document.getElementById('score').innerText = markah;
+}
+
+function paparSoalan() {
+document.getElementById('wheel').innerText = "🎁";
+document.getElementById('syllables').innerText = "? + ? + ?";
+document.getElementById('feedback').innerText = "";
+document.getElementById('next-button').style.display = "none";
+document.getElementById('spin-button').disabled = false;
+
+const pilihanCont = document.getElementById('options-container');
+pilihanCont.innerHTML = "";
+
+// Papar butang kosong sebelum roda dipusing
+for(let i=0; i<4; i++) {
+pilihanCont.innerHTML += `<button class="btn-option" disabled>-</button>`;
+}
+}
+
+function spinWheel() {
+const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spin-button');
+
+spinBtn.disabled = true;
+wheel.classList.add('spinning');
+wheel.innerText = "⏳";
+
+// Animasi pusing selama 1.5 saat
+setTimeout(() => {
+wheel.classList.remove('spinning');
+wheel.innerText = "⭐";
+
+const data = dataSoalanRawak[soalanSemasa];
+document.getElementById('syllables').innerText = data.sukuKata;
+
+paparPilihanJawapan(data);
+}, 1500);
+}
+
+function paparPilihanJawapan(data) {
+const pilihanCont = document.getElementById('options-container');
+pilihanCont.innerHTML = "";
+
+// Susun rawak pilihan jawapan
+const pilihanRawak = [...data.pilihan].sort(() => Math.random() - 0.5);
+
+pilihanRawak.forEach(opsi => {
+pilihanCont.innerHTML += `<button class="btn-option" onclick="checkAnswer(this, '${opsi}')">${opsi}</button>`;
+});
+}
+
+function checkAnswer(btn, jawapanDipilih) {
+const data = dataSoalanRawak[soalanSemasa];
+const semuaButang = document.querySelectorAll('.btn-option');
+
+// Disable semua butang selepas murid pilih
+semuaButang.forEach(b => b.disabled = true);
+
+const feedback = document.getElementById('feedback');
+
+if (jawapanDipilih === data.jawapan) {
+btn.classList.add('correct');
+feedback.innerText = "🎉 BETUL! Pandainya! 🌟";
+feedback.style.color = "#28A745";
+markah++;
+document.getElementById('score').innerText = markah;
+} else {
+btn.classList.add('wrong');
+feedback.innerText = `❌ Cuba lagi! Jawapan betul: ${data.jawapan}`;
+feedback.style.color = "#DC3545";
+
+// Tunjukkan butang yang betul
+semuaButang.forEach(b => {
+if(b.innerText === data.jawapan) b.classList.add('correct');
+});
+}
+
+document.getElementById('next-button').style.display = "inline-block";
+}
+
+function nextQuestion() {
+soalanSemasa++;
+if (soalanSemasa < 15) {
+kemaskiniPapanMarkah();
+paparSoalan();
+} else {
+tamatGame();
+}
+}
+
+function tamatGame() {
+document.getElementById('play-area').style.display = "none";
+document.getElementById('end-area').style.display = "block";
+document.getElementById('final-score').innerText = markah;
+
+const msg = document.getElementById('evaluation-msg');
+if(markah >= 12) {
+msg.innerText = "Luar biasa! Murid-murid sudah menguasai kemahiran KVKVKV dengan sangat baik! 👍🏆";
+} else if(markah >= 8) {
+msg.innerText = "Bagus! Teruskan usaha dan banyakkan latihan membaca ya. 😊";
+} else {
+msg.innerText = "Satu permulaan yang baik. Jom kita ulang kaji lagi lepas ni cikgu bantu. ❤️";
+}
+}
+
+function resetGame() {
+JanisialiseGame();
+}
+
+// Mula game bila page siap load
+window.onload = inisialiseGame;
+</script>
+</body>
+</html>
